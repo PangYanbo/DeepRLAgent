@@ -1,7 +1,8 @@
 import string
 
 import irl.value_iteration
-
+import os
+import shutil
 
 from math import radians, cos, sin, asin, sqrt, ceil,pow
 from fractions import Fraction
@@ -54,18 +55,19 @@ def agent_num(id_trajectory):
     return mesh_num
 
 
-def generate_temporal_traj(g, reward, start, epsilon, i, agent_id):
+def generate_temporal_traj(g, reward, start, epsilon, path, agent_id):
     """
     53394519
     :param g:
     :param reward:
     :param start:
     :param epsilon:
-    :param i:
+    :param path:
     :param agent_id: id of reward parameter
     :return:
     """
-    out = open('C:/Users/PangYanbo/Desktop/UbiResult/Synthetic'+str(i)+'.csv', 'a')
+    out = open(path + '/' + agent_id + 'Synthetic.csv', 'a')
+    print out
     t = 12
     current_state = start
     history = []
@@ -161,7 +163,7 @@ def generate_temporal_traj(g, reward, start, epsilon, i, agent_id):
                 if action_sequence[t - 2].get_mode() != "stay" or \
                         action_sequence[t - 3].get_mode() != "stay" or action_sequence[t - 4].get_mode() != "stay" \
                         or action_sequence[t - 6].get_mode() != "stay" or action_sequence[t - 7].get_mode() != "stay":
-                    if random.random() < 0.99:
+                    if random.random() < 0.8:
                         if random.random() > epsilon:
                             potential = []
                             for key in policy[t][current_state]:
@@ -353,7 +355,7 @@ def duration_gaussian(id_trajectories):
         for t in range(12, 48):
             mean = np.mean(mesh_slot_sample[mesh][t])
             std = np.std(mesh_slot_sample[mesh][t])
-            if std ==0:
+            if std == 0:
                 std += 0.1
             slot_parameter[t] = (mean, std)
         mesh_slot_parameter[mesh] = slot_parameter
@@ -498,7 +500,7 @@ def haversine(lon1, lat1, lon2, lat2):
 def random_weight(weight_data):
     _total = sum(weight_data.values())
     for _k in weight_data.keys():
-        if _k.get_mode()=="stay":
+        if _k.get_mode() is "stay":
             _total -= weight_data[_k]
     _random = random.uniform(0, _total)
     _curr_sum = 0
@@ -526,3 +528,32 @@ def random_temporal_weight(weight_data):
             _ret = _k
             break
     return _ret
+
+
+def move_files(directory):
+    files = os.listdir(directory)
+    files_num = len(files) - 3
+    print files_num
+
+    if files_num >= 50:
+        if not os.path.exists(directory + "training/"):
+            os.mkdir(directory + "training/")
+        if not os.path.exists(directory + "validation/"):
+            os.mkdir(directory + "validation/")
+
+        count = 0
+
+        print files
+
+        for filename in files:
+            path = directory + filename
+            print path
+            if not os.path.isdir(path):
+                print "not dir"
+                if count < int(0.8*files_num):
+                    shutil.move(path, directory + "training/")
+                    print "move files", path
+                    count += 1
+                else:
+                    shutil.move(path, directory + "validation/")
+

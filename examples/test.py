@@ -1,9 +1,8 @@
-from random import choice
+import folium
 
-import math
+m = folium.Map(
+    location=[34.7, 135.2],
+    tiles='OpenStreetMap',
+    zoom_start=4
+)
 
-print 1/math.log10(1)
-
-policy ={"a":0.3,"b":0.2,"c":0.1,"d":0.4}
-
-print choice(key=policy.items() [1])

@@ -47,10 +47,10 @@ def irl(graph, feature_matrix, trajectories, epochs, learning_rate):
     return alpha
 
 
-def t_irl(graph, feature_matrix, trajectories, epochs, learning_rate, date):
+def t_irl(graph, feature_matrix, trajectories, epochs, learning_rate, path):
 
     param_id = random.randint(0, 100000)
-    param = "C:/Users/PangYanbo/Desktop/UbiResult/param"+date+"/"+str(param_id)+".csv"
+    param = path + "param.csv"
     with open(param, "wb")as f:
         alpha = dict()
         for t in range(12, 48):
@@ -80,7 +80,7 @@ def t_irl(graph, feature_matrix, trajectories, epochs, learning_rate, date):
             count = 0
             while True:
                 count += 1
-                print "feature_expectations", feature_expectations[t]
+                # print "feature_expectations", feature_expectations[t]
 
                 policy_feature_expectations = np.zeros(11)
 
@@ -94,7 +94,7 @@ def t_irl(graph, feature_matrix, trajectories, epochs, learning_rate, date):
                     alpha[t][4] = 10
                     break
 
-                print np.sqrt(grad.dot(grad))
+                # print np.sqrt(grad.dot(grad))
 
                 alpha[t] += learning_rate * grad
 
@@ -103,14 +103,12 @@ def t_irl(graph, feature_matrix, trajectories, epochs, learning_rate, date):
 
                 current_svf = t_fi_ex_svf(graph, r, 0.9, prev_svf, t)
 
-                print "policy_expectations", t, policy_feature_expectations
-                print "grad", t, grad
-
-                print "alpha", t, alpha[t]
+                # print "policy_expectations", t, policy_feature_expectations
+                # print "grad", t, grad
 
                 if count > epochs or np.sqrt(grad.dot(grad)) < 1e-5:
                     break
-
+            print "alpha", t, alpha[t]
             prev_svf = current_svf.copy()
             for p in alpha[t]:
                 f.write(str(p) + ",")

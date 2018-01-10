@@ -141,7 +141,7 @@ class Graph(object):
                 converse_edge = Edge(edge.get_destination(), edge.get_origin(), edge.get_mode())
                 self._nodes[edge.get_destination()].add_edge(converse_edge)
         except(AttributeError, ValueError, IndexError, TypeError):
-            print "errrrrrrrrrrrrrrrroooooooooooooooooooooooooooorrrrrrrrrrrrrrrrrrrrrrrrrrrr........"
+            print "add edge error"
 
     def get_edge(self, edge):
         count = 0

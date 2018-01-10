@@ -4,19 +4,21 @@ Run maximum entropy inverse reinforcement learning on the gridworld MDP.
 Matthew Alger, 2015
 matthew.alger@anu.edu.au
 """
-
-import sys
-import os
-sys.path.append("D:/Ubicomp/Inverse-Reinforcement-Learning-master")
-# sys.path.append("/home/t-iho/Ubicomp/Inverse-Reinforcement-Learning-master")
-import datetime
-
-import numpy
-import random
+from irl.mdp import load, tools, graph
 import irl.maxent as maxent
 import irl.mdp.gridworld as gridworld
+import sys
+import os
+import datetime
+import numpy
+import random
+sys.path.append("D:/Ubicomp/Inverse-Reinforcement-Learning-master")
+# sys.path.append("/home/t-iho/Ubicomp/Inverse-Reinforcement-Learning-master")
+
+
+
+
 import irl.value_iteration
-from irl.mdp import load, tools, graph
 from random import sample
 import multiprocessing as mp
 
@@ -101,8 +103,36 @@ def main(date, discount, epochs, learning_rate, train=True):
 
     try:
         starttime = datetime.datetime.now()
-        id_traj = load.load_trajectory(5000)
-        id_list = id_traj.keys()
+        path = "D:/ClosePFLOW/"
+
+        dirs = os.listdir(path)
+
+        for dirname in dirs:
+            directory = path + dirname + "/"
+            print directory
+
+            if not os.path.exists(directory+"sim/"):
+                os.mkdir(directory+"sim/")
+
+            tools.move_files(directory)
+
+            if os.path.exists(directory+"training/"):
+                id_traj = load.load_directory_trajectory(directory+"training/")
+                if (len(id_traj) >= 40 and not os.path.exists(directory + "param.csv")) or os.path.getsize(directory + "param.csv") >2038:
+                    trajectories = id_traj.values()
+                    g = load.load_graph_traj(trajectories)
+                    gw = gridworld.Gridworld(g, discount)
+                    feature_matrix = gw.feature_matrix(g)
+
+                    # train#
+                    print "training ", directory
+                    maxent.t_irl(g, feature_matrix, trajectories, epochs, learning_rate, directory)
+
+
+
+
+
+
         indicator = 0
         i = 0
 
@@ -195,4 +225,4 @@ def main(date, discount, epochs, learning_rate, train=True):
         raise
 
 if __name__ == '__main__':
-    main("2", 0.9, 200, 0.3, train=False)
+    main("2", 0.9, 100, 0.3, train=False)

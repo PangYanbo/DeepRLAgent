@@ -1,5 +1,44 @@
 import datetime
 import irl.mdp.graph as graph
+import os
+
+
+def load_directory_trajectory(directory):
+
+    id_traj = {}
+    count = 0
+
+    files = os.listdir(directory)
+
+    for filename in files:
+        path = directory + filename
+        if not os.path.isdir(path):
+            with open(path) as f:
+                count += 1
+                for line in f.readlines():
+                    try:
+                        line = line.strip('\n')
+                        tokens = line.split(",")
+                        agent_id = tokens[0]
+                        timeslot = int(tokens[1])
+                        start = tokens[2]
+                        end = tokens[3]
+                        mode = tokens[4]
+                        e = graph.Edge(start, end, mode)
+                        traj = (start, e)
+
+                        if agent_id not in id_traj.keys():
+                            trajectory = {}
+                            id_traj[agent_id] = trajectory
+                            id_traj[agent_id][timeslot] = traj
+                        else:
+                            id_traj[agent_id][timeslot] = traj
+                    except(AttributeError, ValueError, IndexError, TypeError):
+                        print "errrrrrrrrrrrrrrrroooooooooooooooooooooooooooorrrrrrrrrrrrrrrrrrrrrrrrrrrr........"
+                f.close()
+
+    return id_traj
+
 
 
 def load_trajectory(num):
