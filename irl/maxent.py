@@ -1,55 +1,18 @@
 """
 Implements maximum entropy inverse reinforcement learning (Ziebart et al., 2008)
 
-Matthew Alger, 2015
-matthew.alger@anu.edu.au
+
 """
 
 
 import numpy as np
-import numpy.random as rn
-import random
-import csv
+
 
 from . import value_iteration
 
 
-def irl(graph, feature_matrix, trajectories, epochs, learning_rate):
-    alpha = np.array([0, 0, 0, 0, 0, 0, 0, -1.0, -4.0, -4.0, -4.0])
-    print "initial alpha", alpha
-    feature_expectations = fi_fe_ex(feature_matrix, trajectories)
-
-    r = dict()
-
-    for i in range(epochs):
-        print "feature_expectations", feature_expectations
-
-        for edge in graph.get_edges():
-            r[edge] = feature_matrix[edge].dot(alpha)
-
-        expected_svf = find_expected_svf(graph, r, 0.9, trajectories)
-
-        policy_feature_expectations = np.zeros(11)
-        for j in range(11):
-            for edge in graph.get_edges():
-                policy_feature_expectations[j] += feature_matrix[edge][j] * expected_svf[edge]
-
-        grad = feature_expectations - policy_feature_expectations
-        alpha += learning_rate * grad
-
-        print "grad", grad
-        print "policy expectations", policy_feature_expectations
-        print "alpha", alpha
-        # print "reward",r
-    for edge in graph.get_edges():
-        r[edge] = feature_matrix[edge].dot(alpha)
-
-    return alpha
-
-
 def t_irl(graph, feature_matrix, trajectories, epochs, learning_rate, path):
 
-    param_id = random.randint(0, 100000)
     param = path + "param.csv"
     with open(param, "wb")as f:
         alpha = dict()
@@ -248,3 +211,36 @@ def t_fi_ex_svf(graph, reward, discount, prev_svf, step):
     #     edge_svf[edge] = expected_svf[node]
 
     return expected_svf
+
+
+def irl(graph, feature_matrix, trajectories, epochs, learning_rate):
+    alpha = np.array([0, 0, 0, 0, 0, 0, 0, -1.0, -4.0, -4.0, -4.0])
+    print "initial alpha", alpha
+    feature_expectations = fi_fe_ex(feature_matrix, trajectories)
+
+    r = dict()
+
+    for i in range(epochs):
+        print "feature_expectations", feature_expectations
+
+        for edge in graph.get_edges():
+            r[edge] = feature_matrix[edge].dot(alpha)
+
+        expected_svf = find_expected_svf(graph, r, 0.9, trajectories)
+
+        policy_feature_expectations = np.zeros(11)
+        for j in range(11):
+            for edge in graph.get_edges():
+                policy_feature_expectations[j] += feature_matrix[edge][j] * expected_svf[edge]
+
+        grad = feature_expectations - policy_feature_expectations
+        alpha += learning_rate * grad
+
+        print "grad", grad
+        print "policy expectations", policy_feature_expectations
+        print "alpha", alpha
+        # print "reward",r
+    for edge in graph.get_edges():
+        r[edge] = feature_matrix[edge].dot(alpha)
+
+    return alpha
