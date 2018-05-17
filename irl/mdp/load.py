@@ -11,6 +11,7 @@ def load_directory_trajectory(directory):
     files = os.listdir(directory)
 
     for filename in files:
+        print filename
         path = directory + filename
         if not os.path.isdir(path):
             with open(path) as f:

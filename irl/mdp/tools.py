@@ -82,6 +82,8 @@ def generate_temporal_traj(g, reward, start, epsilon, path, agent_id):
         # policy = irl.value_iteration.find_temporal_policy(g, reward, 0.9, 1e-2, None, True)
         action = random_temporal_weight(policy[t][current_state])
 
+        if action != "stay":
+            print
         # greedy method to decide explore or exploit
         # if random > epsilon, choose destination from history
 

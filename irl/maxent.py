@@ -15,16 +15,17 @@ def t_irl(graph, feature_matrix, trajectories, epochs, learning_rate, path):
 
     param = path + "param.csv"
     with open(param, "wb")as f:
-        alpha = dict()
-        for t in range(12, 48):
-            alpha[t] = np.zeros(11)
+        # initial reward function parameters
+        alpha = dict().fromkeys(range(12,48), np.zeros(11))
 
         r = dict()
         for t in range(12, 48):
             r[t] = dict().fromkeys(graph.get_edges(), 0)
 
+        # derive feature expectations from demonstrated trajectories
         feature_expectations = t_fi_fe_ex(feature_matrix, trajectories)
 
+        # calculate initial state frequency
         start_state_count = dict().fromkeys(graph.get_edges(), 0)
 
         for trajectory in trajectories:
@@ -38,6 +39,16 @@ def t_irl(graph, feature_matrix, trajectories, epochs, learning_rate, path):
             prev_svf[edge] = float(start_state_count[edge]) / len(trajectories)
 
         current_svf = prev_svf.copy()
+
+        #action visited count
+
+        for trajectory in trajectories:
+            for t in range(12,47):
+                if t in trajectory.keys():
+
+
+
+
 
         for t in range(12, 47):
             count = 0
@@ -116,12 +127,13 @@ def t_fi_fe_ex(feature_matrix, trajectories):
     feature_expectations = dict()
     count = 0
     for i in range(12, 48):
-        feature_expectations[i] = np.zeros(11)
+        feature_expectations[i] = np.zeros(12)
         for trajectory in trajectories:
             if i in trajectory.keys():
                 edge = trajectory[i][1]
                 if edge in feature_matrix.keys():
-                    feature_expectations[i] += feature_matrix[edge]
+                    feature_expectations[i][0:11] = feature_expectations[i][0:11] + feature_matrix[edge]
+                    feature_expectations[i][12] =
         feature_expectations[i] /= len(trajectories)
     print count
     return feature_expectations
@@ -133,7 +145,7 @@ def find_expected_svf(graph, reward, discount, trajectories):
     :param graph:
     :param reward:
     :param discount:
-    :param trajectories: trajectory ={'0'(node,edge),'1'(node,edge),...(node,edge)}
+    :param trajectories: trajectory ={'12':(node,edge),'13':(node,edge),...'47':(node,edge)}
     :return:
     """
 

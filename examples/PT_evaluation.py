@@ -1,4 +1,4 @@
-from irl.mdp import load,tools
+from irl.mdp import load, tools
 import irl.value_iteration
 import irl.mdp.gridworld as gridworld
 import sys
