@@ -1,14 +1,10 @@
 import sys
 sys.path.append("D://Ubicomp//Inverse-Reinforcement-Learning-master")
-from irl.mdp import tools, load
+from irl.mdp import load
+from utils import tools, load
 
 import os
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import math
-import numpy as np
-import random
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def load_markovchain(directory):
@@ -75,7 +71,7 @@ def main():
 
     path = "D:/training data/KDDI/#201111.CDR-data/abf7380g/"
 
-    train_traj = load.load_directory_trajectory(path+"slot/")
+    train_traj = load.load_directory_trajectory(path + "slot/")
 
     traj_visual(train_traj)
 

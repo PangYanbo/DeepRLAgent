@@ -1,11 +1,11 @@
 import os
 import os.path
 
+
 def Coordinate2MeshCode(dLat, dLng ):
     dLat = float(dLat)
     dLng = float(dLng)
-    # cf: http://white-bear.info/archives/1400
-    # Make sure the input values are decimal
+
     iMeshCode_1stMesh_Part_p = dLat *60 // 40;
     iMeshCode_1stMesh_Part_u = ( dLng - 100 ) // 1;
     iMeshCode_2ndMesh_Part_q = dLat *60 % 40 // 5;
@@ -16,11 +16,15 @@ def Coordinate2MeshCode(dLat, dLng ):
     print(str(int(iMeshCode)))
     return str(int(iMeshCode));
 
-with open("D:\\PFLOW\\all_mesh.csv", "w") as wr:
-    directory = "D:\\PFLOW\\PFLOW\\"
+
+# with open("D:\\PFLOW\\all_mesh.csv", "w") as wr:
+with open("/home/ubuntu/Data/pflow_data/p_all_mesh.csv", "w") as wr:
+    # directory = "D:\\PFLOW\\PFLOW\\"
+    directory = "/home/ubuntu/Data/pflow_data/pflow-csv/"
     # files = os.listdir(directory)
 
-    for root, dirs, files in os.walk("D:\\PFLOW\\PFLOW\\"):
+    # for root, dirs, files in os.walk("D:\\PFLOW\\PFLOW\\"):
+    for root, dirs, files in os.walk("/home/ubuntu/Data/pflow_data/pflow-csv/"):
         for name in files:
             path = os.path.join(root, name)
             print(path)
@@ -35,7 +39,7 @@ with open("D:\\PFLOW\\all_mesh.csv", "w") as wr:
                         line = line.strip("\n")
                         tokens = line.split(",")
 
-                        if tokens[10]!= prev_purpose:
+                        if tokens[10] != prev_purpose:
                             if "12" in mode_list or "11" in mode_list:
                                 mode = "12"
                             elif "2" in mode_list or "3" in mode_list or "4" in mode_list or "5" in mode_list or "6" in mode_list or "7" in mode_list or "8" in mode_list or "9" in mode_list or "10" in mode_list:

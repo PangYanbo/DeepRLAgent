@@ -4,23 +4,22 @@ Run maximum entropy inverse reinforcement learning on the gridworld MDP.
 Matthew Alger, 2015
 matthew.alger@anu.edu.au
 """
-from irl.mdp import load, tools, graph
+import datetime
+import os
+import random
+import sys
+
+import numpy
+
 import irl.maxent as maxent
 import irl.mdp.gridworld as gridworld
-import sys
-import os
-import datetime
-import numpy
-import random
+from irl.mdp import load, graph
+from utils import tools, load
+
 sys.path.append("D:/Ubicomp/Inverse-Reinforcement-Learning-master")
 # sys.path.append("/home/t-iho/Ubicomp/Inverse-Reinforcement-Learning-master")
 
 
-
-
-import irl.value_iteration
-from random import sample
-import multiprocessing as mp
 
 
 def training(pos):
@@ -117,7 +116,7 @@ def main(date, discount, epochs, learning_rate, train=True):
             tools.move_files(directory)
 
             if os.path.exists(directory+"training/"):
-                id_traj = load.load_directory_trajectory(directory+"training/")
+                id_traj = load.load_directory_trajectory(directory + "training/")
                 if (len(id_traj) >= 40 and not os.path.exists(directory + "param.csv")) or os.path.getsize(directory + "param.csv") >2038:
                     trajectories = id_traj.values()
                     g = load.load_graph_traj(trajectories)

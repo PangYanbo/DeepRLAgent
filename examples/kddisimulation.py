@@ -1,11 +1,11 @@
-from irl.mdp import load, tools, graph
-import irl.maxent as maxent
-import irl.mdp.gridworld as gridworld
-import sys
 import os
-import datetime
+import sys
+
 import numpy
-import random
+
+import irl.mdp.gridworld as gridworld
+from utils import tools, load
+
 sys.path.append("D:/Ubicomp/Inverse-Reinforcement-Learning-master")
 
 
@@ -26,27 +26,26 @@ def simulation(path):
             gw = gridworld.Gridworld(g, 0.9)
             feature_matrix = gw.feature_matrix(g)
 
-            t_alpha = {}
-            with open(parampath, 'r') as f:
-                t = 12
-                for line in f:
-                    line = line.strip('\n')
-                    tokens = line.split(",")
-                    param = numpy.zeros(11)
-                    for j in range(11):
-                        if len(tokens) > j:
-                            param[j] = tokens[j]
-                    t_alpha[t] = param.copy()
-                    t += 1
+            alpha = load.load_param(parampath)
+            print(alpha)
 
             r = dict()
             for t in range(12, 48):
                 r[t] = dict().fromkeys(g.get_edges(), 0)
 
-            for edge in g.get_edges():
-                for t in range(12, 48):
-                    if t in t_alpha.keys():
-                        r[t][edge] = feature_matrix[edge].dot(t_alpha[t])
+            for t in range(12, 48):
+                for edge in g.get_edges():
+                    if t in alpha.keys():
+                        r[t][edge] = feature_matrix[t][edge].dot(alpha[t])
+            print(r)
+
+            for i in range(10):
+                print("****************")
+                directory = "/home/ubuntu/Data/KDDI/#201111.CDR-data/abf7380g/sim/"
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
+                tools.simple_trajectory(g, r, "53397561", "/home/ubuntu/Data/KDDI/#201111.CDR-data/abf7380g/sim/", "53397561" +
+                                        "_" + str(i))
 
             start = "53397561"
             tools.generate_temporal_traj(g, r, start, 0.5, path + "sim/", filename[0:2])
@@ -55,11 +54,12 @@ def simulation(path):
 def main(date, discount, epochs, learning_rate, train=True):
     try:
 
-        simulation("D:/training data/KDDI/#201111.CDR-data/abf7380g/")
+        simulation("/home/ubuntu/Data/KDDI/#201111.CDR-data/abf7380g/")
 
     except Exception:
-        print "main class wrong"
+        print("main class wrong")
         raise
+
 
 if __name__ == '__main__':
     main("2", 0.9, 100, 0.3, train=False)

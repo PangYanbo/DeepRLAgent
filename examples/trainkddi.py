@@ -1,10 +1,12 @@
-import sys
-import os
 import datetime
+import os
 import random
-from irl.mdp import load, tools
+import sys
+
 import irl.maxent as maxent
 import irl.mdp.gridworld as gridworld
+from utils import load
+
 sys.path.append("D:/Ubicomp/Inverse-Reinforcement-Learning-master")
 
 
@@ -19,19 +21,17 @@ def main(discount, epochs, learning_rate):
 
     try:
         starttime = datetime.datetime.now()
-        path = "D:/training data/KDDI/#201111.CDR-data/abf7380g/slot/"
+        path = "/home/ubuntu/Data/KDDI/#201111.CDR-data/vks2564k/slot/"
 
         id_traj = load.load_directory_trajectory(path)
 
-        print len(id_traj)
+        print(len(id_traj))
 
-        trajectories = random.sample(id_traj.values(), 20)
+        trajectories = id_traj.values()
         g = load.load_graph_traj(trajectories)
+        g.set_start("53397561")
         gw = gridworld.Gridworld(g, discount)
         feature_matrix = gw.feature_matrix(g)
-
-        # train#
-        print("training ", path)
 
         if not os.path.exists(path + "param/"):
             os.mkdir(path + "param/")
@@ -45,5 +45,6 @@ def main(discount, epochs, learning_rate):
         print("mian class wrong")
         raise
 
+
 if __name__ == '__main__':
-    main(0.9, 100, 0.3)
+    main(0.9, 400, 3)

@@ -1,8 +1,11 @@
-import numpy as np
 import datetime
-from scipy.optimize import minimize
-from irl.mdp import load, tools, graph
+
 import feature_extractor
+import numpy as np
+from scipy.optimize import minimize
+
+from irl.mdp import graph
+from utils import tools, load
 
 
 def trip_getter(trajectory, order):

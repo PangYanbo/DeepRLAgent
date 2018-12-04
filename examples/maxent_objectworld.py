@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 import irl.maxent as maxent
 import irl.mdp.objectworld as objectworld
-from irl.value_iteration import find_policy
+from irl.solver.value_iteration import find_policy
 
 def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
          learning_rate):

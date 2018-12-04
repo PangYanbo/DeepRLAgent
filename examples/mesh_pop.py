@@ -1,11 +1,7 @@
-from irl.mdp import tools, load
-import sys
-import os
-import matplotlib.pyplot as plt
-import math
-import numpy as np
 import random
-import scipy.stats as stats
+
+from utils import load
+
 
 def pearson(pop1,pop2):
 
@@ -28,14 +24,14 @@ def pearson(pop1,pop2):
             sum_pop1_square += pop1[meshid] * pop1[meshid]
             sum_pop2_square += pop2.get(meshid) * pop2.get(meshid)
             sum_pop1pop2 += pop1.get(meshid) * pop2.get(meshid)
-    }else{
-        sum_pop1 += pop1.get(meshid);
-    sum_pop2 += 0;
-    sum_pop1_square += pop1.get(meshid) * pop1.get(meshid);
-    sum_pop2_square += 0;
-    sum_pop1pop2 += 0;
-    }
-    }
+        else:
+            sum_pop1 += pop1.get(meshid)
+            sum_pop2 += 0
+        sum_pop1_square += pop1.get(meshid) * pop1.get(meshid)
+        sum_pop2_square += 0
+        sum_pop1pop2 += 0
+
+
 def gps_pop(number1, number2):
     count = 0
     mesh_hour_pop = {}
@@ -64,7 +60,7 @@ def gps_pop(number1, number2):
                 print "errrrrrrrrrrrrrrrroooooooooooooooooooooooooooorrrrrrrrrrrrrrrrrrrrrrrrrrrr........"
 
     f.close()
-    return  mesh_hour_pop
+    return mesh_hour_pop
 
 
 def traj_to_mesh(date, rate):
@@ -86,6 +82,7 @@ def traj_to_mesh(date, rate):
                     else:
                         mesh_t_count[traj[t][0]][t] += 1
     return mesh_t_count
+
 
 def main():
     mesh_t_pop_1 = gps_pop(0, 10000)

@@ -1,104 +1,117 @@
-from irl.mdp import load, tools
-import irl.mdp.gridworld as gridworld
 import sys
+sys.path.append("/home/ubuntu/PycharmProjects/RLAgent")
+import irl.mdp.gridworld as gridworld
+from utils import tools, load
 import os
 import datetime
 import numpy
 import random
 
-sys.path.append("D:/Ubicomp/Inverse-Reinforcement-Learning-master")
+
+def read_list(path):
+    mesh_list = []
+    with open(path, "r")as f:
+        for line in f.readlines():
+            tokens = line.strip("\r\n").split(",")
+            mesh = tokens[2]
+            mesh_list.append(mesh)
+    return mesh_list
 
 
-def simulation(trajectories, path, start, count):
+def simulation(trajectories, path, start, count, job):
 
     files = os.listdir(path+"param/")
 
-    for filename in files:
-        parampath = path + "param/" + filename
-        if not os.path.isdir(parampath):
+    parampath = path + "param/" + random.choice(files)
+    if not os.path.isdir(parampath):
 
-            # trajectories = random.sample(trajectories, 50)
-            try:
-                g = load.load_graph_traj(trajectories)
-                gw = gridworld.Gridworld(g, 0.9)
-                feature_matrix = gw.feature_matrix(g)
+        # trajectories = random.sample(trajectories, 50)
+        try:
+            g = load.load_graph_traj(trajectories)
+            gw = gridworld.Gridworld(g, 0.9)
+            feature_matrix = gw.feature_matrix(g)
 
-                t_alpha = {}
-                with open(parampath, 'r') as f:
-                    t = 12
-                    for line in f:
-                        line = line.strip('\n')
-                        tokens = line.split(",")
-                        param = numpy.zeros(11)
-                        for j in range(11):
-                            if len(tokens) > j:
-                                param[j] = tokens[j]
-                        t_alpha[t] = param.copy()
-                        t += 1
+            t_alpha = {}
+            with open(parampath, 'r') as f:
+                t = 12
+                for line in f:
+                    line = line.strip('\n')
+                    tokens = line.split(",")
+                    param = numpy.zeros(11)
+                    for j in range(11):
+                        if len(tokens) > j:
+                            param[j] = tokens[j]
+                    t_alpha[t] = param.copy()
+                    t += 1
 
-                r = dict()
+            r = dict()
+            for t in range(12, 48):
+                r[t] = dict().fromkeys(g.get_edges(), 0)
+
+            for edge in g.get_edges():
                 for t in range(12, 48):
-                    r[t] = dict().fromkeys(g.get_edges(), 0)
+                    if t in t_alpha.keys():
+                        r[t][edge] = feature_matrix[edge].dot(t_alpha[t])
 
-                for edge in g.get_edges():
-                    for t in range(12, 48):
-                        if t in t_alpha.keys():
-                            r[t][edge] = feature_matrix[edge].dot(t_alpha[t])
+            for i in range(count):
+                # start = random.choice(initial)
+                tools.simple_trajectory(g, r, start, "/home/ubuntu/Data/PT_Result/exp3", start + "_" + job + "_" + str(i))
 
-                for i in range(count):
-                    # start = random.choice(initial)
-                    tools.generate_temporal_traj(g, r, start, 0.5, path + "sim/", str(i) + filename[0:2])
-
-            except KeyError:
-                return 0
+        except KeyError:
+            return 0
 
 
 def main():
     try:
         starttime = datetime.datetime.now()
 
-        id_traj = load.load_directory_trajectory("D:/PT_Result/trajectory/")
+        mesh_list = read_list("/home/ubuntu/Data/Tokyo/MeshCode/Tokyo.csv")
 
-        with open("C:/Users/PangYanbo/Desktop/Tokyo/Census5339/2015meshpop.csv") as f:
+        print(mesh_list)
+        with open("/home/ubuntu/Data/pflow_data/init_distribution.csv") as f:
             title = f.readline()
             for line in f.readlines():
 
-                print "#############################"
-                print line
+                print("#############################")
+                print(line)
                 line = line.strip('\n')
                 tokens = line.split(',')
                 mesh_id = tokens[0]
 
-                trajectories = []
+                if mesh_id in mesh_list:
 
-                for uid in id_traj:
-                    if 12 in id_traj[uid].keys():
-                        if id_traj[uid][12][0].__eq__(mesh_id):
-                            trajectories.append(id_traj[uid])
+                    if os.path.exists("/home/ubuntu/Data/pflow_data/pflow-csv/" + mesh_id + "/train_irl.csv"):
+                        print("/home/ubuntu/Data/pflow_data/pflow-csv/" + mesh_id + "/")
+                        # id_traj = load.load_trajectory("/home/ubuntu/Data/PT_Result/training/PT_commuter_irl_revised.csv")
+                        id_traj = load.load_trajectory("/home/ubuntu/Data/pflow_data/pflow-csv/" + mesh_id + "/train_irl.csv")
 
-                if len(trajectories) == 0:
-                    continue
+                        if len(id_traj.values()) < 10:
+                            continue
 
-                jobless = int(tokens[1])
-                workers = int(tokens[2])
-                students = int(tokens[3])
+                        trajectories = id_traj.values()
 
-                jobless_path = "D:/PT_Result/others/"
-                simulation(trajectories, jobless_path, mesh_id, jobless)
+                        # 20% of samples by divide 5
+                        jobless = (int(tokens[3]) + int(tokens[4]))
+                        workers = int(tokens[1])
+                        students = int(tokens[2])
 
-                workers_path = "D:/PT_Result/commuter/"
-                simulation(trajectories, workers_path, mesh_id, workers)
+                        jobless_path = "/home/ubuntu/Data/PT_Result/others/"
+                        simulation(trajectories, jobless_path, mesh_id, jobless, "others")
 
-                students_path = "D:/PT_Result/student/"
-                simulation(trajectories, students_path, mesh_id, students)
+                        workers_path = "/home/ubuntu/Data/PT_Result/commuter/"
+                        simulation(trajectories, workers_path, mesh_id, workers, "commuters")
+
+                        students_path = "/home/ubuntu/Data/PT_Result/student/"
+                        simulation(trajectories, students_path, mesh_id, students, "students")
 
         endtime = datetime.datetime.now()
 
-        print endtime - starttime
+        print(endtime - starttime)
 
     except Exception:
-        print "main class wrong"
+        print("main class wrong")
         raise
+
 
 if __name__ == '__main__':
     main()
