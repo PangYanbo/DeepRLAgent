@@ -69,14 +69,17 @@ def find_demo_svf(env):
     :param trajectories:
     :return:
     """
-    n_actions = env.n_action
-    print(env.trajectories)
-    p = np.zeros([48, n_actions])
-    for trajectory in env.trajectories:
-        for traj in trajectory:
-            i = env.action_index[trajectory[traj][1]]
-            p[traj, i] += 1
-    p = p / len(env.trajectories)
+    episodes = env.load_episode('/home/ubuntu/PycharmProjects/demonstrations/test_sub.csv')
+    print(episodes)
+    
+    p = np.zeros([48, len(env.action_space)])
+
+    for episode in episodes:
+        for t in range(48):
+            action = episode[t][1]  
+            i = env.action_index[action]
+            p[t, i] += 1
+    p = p / len(episodes)
 
     return p
 

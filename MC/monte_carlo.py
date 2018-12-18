@@ -9,12 +9,15 @@ import numpy as np
 import random
 from collections import defaultdict
 import main.Env.urbanEnv as urbanEnv
+import matplotlib
+matplotlib.use('Agg')
+import gym
 
 
 def on_policy_first_visit_mc_control(env, n_episodes=5000):
     """
     """
-    reward = env.get_reward()
+    rewards = env.get_reward()
     # print(reward)
 
     Q = {}
@@ -28,21 +31,31 @@ def on_policy_first_visit_mc_control(env, n_episodes=5000):
 
     policy = epsilon_greedy_policy(Q, env)
 
+    reward_curve = []
     for k in range(n_episodes):
 	if k % 10 == 0:
 	    print("processed " + str(k) + " episodes")
             # update policy every 10 iteration
 	    policy = epsilon_greedy_policy(Q, env)
 
+        reward_list = [] 
 	for s in env.initial_state:
+            cum_reward = 0
             episode = generate_episode(env, policy, s)
             for i, sa_pair in enumerate(episode):
 		state, action, reward = episode[i]
-           	G = sum([reward[i+j][env.action_index[sa[1]]] for j, sa in enumerate(episode[i:])])
+                cum_reward += reward
+           	G = sum([rewards[i+j+12][env.action_index[sa[1]]] for j, sa in enumerate(episode[i:])])
  
 		returns_sum[sa_pair] += G 
 		states_count[sa_pair] += 1.0
 		Q[s][a] = returns_sum[sa_pair] / states_count[sa_pair]
+            reward_list.append(cum_reward)
+        reward_curve.append(np.average(reward_list))
+    import matplotlib.pyplot as plt
+    
+    plt.plot(range(len(reward_curve)), reward_curve)
+    plt.savefig('reward_hist.png')
     return Q
 
 
@@ -53,11 +66,13 @@ def epsilon_greedy_policy(Q, env, epsilon=0.2):
     """
     policy = dict()
 
-    for s in env.state_space:
+    for s in env.observation_space:
+    # for s in env.state_space:
         policy[s] = {}
 	optimal_action = max(Q[s].items(), key = lambda x:x[1])[0]
 
-	for a in env.sub_action_space(s):
+        for a in env.action_space(s):
+	# for a in env.sub_action_space(s):
 	    if a == optimal_action:
 		policy[s][a] = 1 - epsilon + epsilon / len(env.sub_action_space(s))
 	    else:
@@ -175,15 +190,17 @@ def off_policy_mc_control(env, n_episodes):
 
 def main():
 
-    env = urbanEnv.UrbanEnv(100, "/home/ubuntu/Data/all_train_irl.csv")
+    #env = urbanEnv.UrbanEnv(100, "/home/ubuntu/Data/all_train_irl.csv")
+    env = gym.make('MountainCar-v0')   
+    
+    Q = on_policy_first_visit_mc_control(env, 1000)
 
-    # Q = on_policy_first_visit_mc_control(env)
-
-    Q, _ = off_policy_mc_control(env, 500)
+    # Q, _ = off_policy_mc_control(env, 500)
 
     print(Q)
 
 
 if __name__ == "__main__":
     import profile
-    profile.run('main()')
+    #profile.run('main()')
+    main()

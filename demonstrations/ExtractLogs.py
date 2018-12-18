@@ -37,7 +37,7 @@ def read_point(path, east_lon, east_lat, west_lon, west_lat):
         return id_points
 
 
-# print(read_point('/home/ubuntu/Data/pflow_data/pflow-csv/52392688/00569707.csv', 140,40,138,30))
+(read_point('/home/ubuntu/Data/pflow_data/pflow-csv/52392688/00569707.csv', 140,40,138,30))
 
 
 def user_filter(id_points, shp_path, threhold=20):
@@ -46,7 +46,7 @@ def user_filter(id_points, shp_path, threhold=20):
     """
     inst = fiona.open(shp_path)
     multi = inst.next()
-    print("shapefile read by fiona", multi)
+    # print("shapefile read by fiona", multi)
 
     for uid in id_points:
         if len(id_points[uid]) >= threhold:
@@ -58,12 +58,13 @@ def user_filter(id_points, shp_path, threhold=20):
             lon_2 = id_points[uid][len(id_points[uid])-1].lon
             point_2 = Point(lon_2, lat_2)
 
-            print(multi['geometry'])
+           #  print(multi['geometry'])
 
             if point.within(shape(multi['geometry'])) and point_2.within(shape(multi['geometry'])):
                 slot = set()
                 for p in id_points[uid]:
                     time = p.time.seconds
+                    print(type(time))
                     slot.add(time/1800)
                 if len(slot) >= 10:
                     continue
@@ -73,7 +74,7 @@ def user_filter(id_points, shp_path, threhold=20):
     return id_points        
                
 
-print(user_filter(read_point('/home/ubuntu/Data/pflow_data/pflow-csv/52392688/00569707.csv', 140,40,138,30), '/home/ubuntu/Data/Tokyo/TokyoZone/TokyoZone/'))
+#print(user_filter(read_point('/home/ubuntu/Data/pflow_data/pflow-csv/52392688/00569707.csv', 140,40,138,30), '/home/ubuntu/Data/Tokyo/TokyoZone/TokyoZone/'))
 
 
 

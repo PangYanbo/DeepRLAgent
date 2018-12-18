@@ -22,7 +22,7 @@ class DQNAgent:
     use agent_hist as state container
     2018/09/26/ update
     """
-    def __init__(self, env, n_features, learning_rate=0.01, reward_decay=0.9, e_greedy=0.9, replace_target_iter=300,
+    def __init__(self, env, n_features, learning_rate=0.01, reward_decay=1.0, e_greedy=0.9, replace_target_iter=300,
                  memory_size=500, batch_size=32, agent_hist_len=4, e_greedy_increment=None, output_graph=True):
         self.env = env
         self.n_actions = len(env.action_space)
@@ -197,6 +197,7 @@ class DQNAgent:
         # increasing epsilon
         self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
         self.learn_step_counter += 1
+
 
     def plot_cost(self):
         import matplotlib.pyplot as plt
