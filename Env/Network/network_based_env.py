@@ -1,10 +1,13 @@
 # -----------------------------2018/11/27--------------------------
 import os
+import sys
+sys.path.append('/home/ubuntu/PycharmProjects/DeepAgent/')
 import random
 import numpy as np
 import datetime
 import math
 import networkx as nx
+import jismesh.utils as ju
 import utils.tools as tools
 from collections import deque
 from itertools import chain
@@ -89,8 +92,10 @@ class Env(object):
         self.n_states = len(self.state_space)
         self.n_actions = len(self.action_space)
 
-        self.n_features = 30	
+        self.n_features = 100
+        self.telepoint_feature = self.load_telepoint_feature('/home/ubuntu/Data/Tokyo/Telepoint/')	       self.weather_feature = self.load_weather_feature('/home/ubuntu/Data/Tokyo/Weather/')
 
+        
     def step(self, s, a, t):
 	# TODO
         # action.destination is a string of node
@@ -165,6 +170,44 @@ class Env(object):
  
         return features
 
+    def load_telepoint_feature(self, path):
+        """
+        data is collected from telepoint, zenrin
+        office count is sorted by mesh in level 5
+        """
+        index_mesh_count = dict()
+
+        tele_point_list = os.listdir('/home/ubuntu/Data/Tokyo/Telepoint/')
+ 
+        for i in range(len(tele_point_list)):
+            filename =  tele_point_list[i]
+            index = filename[:-4]
+            index_mesh_point[index] = dict()
+            with open(path+filename, 'r') as f:
+                for line in f.readlines():
+                    tokens = line.strip('\n').split(',')
+                    mesh = tokens[0]
+                    count = int(tokens[1])
+                    index_mesh_count[index][mesh] = count
+
+        return index_mesh_count
+
+    def load_weather_feature(self, path):
+        """
+        """
+        time_column_info = {}
+        with open(path, 'r') as f:
+            f.readline()
+            for line in f.readlines():
+                tokens = line.strip('\n').split(',')
+                time = int(tokens[0])
+                time_column_info = {}
+                for i in range(len(tokens)-1):
+                    if i < 9:
+                        time_column_info[time][i] = float(tokens[i])  
+        return time_column_info
+
+
     def episode_feature(self, episode):
         """
         inputs: episode(t, s, a)
@@ -173,22 +216,34 @@ class Env(object):
         t, s, a = episode
         origin = s.node
         destination = a.node
+        dest_mesh = ju.to_meshcode(self.graph.nodes[destination]['y'], self.graph.nodes[destination]['x'], 5)
 
-        path = nx.shortest_path(self.graph, origin, destination)
-
-       
+        # path = nx.shortest_path(self.graph, origin, destination)
 
         f = np.zeros([self.n_features])
-
-        f[0] = self.graph.nodes[origin]['x']
-        f[1] = self.graph.nodes[origin]['y']
-        f[2] = self.graph.nodes[destination]['x']
-        f[3] = self.graph.nodes[destination]['y']
-        f[4] = 
-
-    def reward(self, s, a, t):
         
-        return random.random()
+        i = 0 
+        for key in self.telepoint_feature
+            if mesh in self.telepoint_feature[key]：
+                f[i] = self.telepoint_feature[key][dest_mesh] 
+            i += 1             
+
+        f[i] = self.graph.nodes[origin]['x']
+        f[i+1] = self.graph.nodes[origin]['y']
+        f[i+2] = self.graph.nodes[destination]['x']
+        f[i+3] = self.graph.nodes[destination]['y']
+        # weather data
+        for j in range(8):
+            f[i+3+j] = self.weather_feature[t][j]
+        
+        return f
+    
+    def update_reward_function(self, theta):
+        self.theta = theta
+
+    def reward(self, episode):
+        
+        return self.theta.dot(self.episode_feature(episode))
 
 
     def load_episode(self, path):
